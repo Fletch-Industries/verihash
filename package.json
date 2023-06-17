@@ -1,0 +1,16 @@
+{
+  "name": "verihash",
+  "version": "0.1.0",
+  "description": "Store record of your secrets securely on the blockchain.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Open BSV License",
+  "dependencies": {
+    "@babbage/sdk": "^0.4.25",
+    "babbage-bsv": "^0.2.0",
+    "pushdrop": "^0.1.20"
+  }
+}
