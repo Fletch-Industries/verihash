@@ -1,46 +1,36 @@
-const { createAction } = require('@babbage/sdk')
-const pushdrop = require('pushdrop')
 const secrets = require('./secrets')
-// const bsv = require('babbage-bsv')
+const { get, set, remove } = require('babbage-kvstore')
+const bsv = require('babbage-bsv')
 
-const createActions = async ({
-  secret = 'super secret data here'
-}) => {
+// Create hashed data that is referenced securely on chain
+const create = async (secret = 'secret') => {
   // Data to hash and store on chain
-  const hashedData = crypto.createHash('sha256').update(secret).digest('base64')
+  const hashedData = bsv.crypto.Hash.sha256(Buffer.from(secret)).toString('base64')
   const slicedData = secrets.share(secrets.str2hex(hashedData), 2, 2)
 
-  const data = {}
-
+  // Use the kvstore overlay to create a separate transaction for each slice
+  // This also generates a separate protectedKey for the slice retrieval based on the randomUUID
+  let sliceKeys = []
   for (const slice of slicedData) {
-    // Create an action script based on the tsp-protocol
-    const bitcoinOutputScript = await pushdrop.create({
-      fields: [
-        Buffer.from(slice, 'hex')
-      ],
-      protocolID: [2, 'verihash'],
-      keyID: '1' // TODO: Consider using a random keyID each time
-    })
-
-    const tx = await createAction(({
-      outputs: [{
-        satoshis: 1,
-        script: bitcoinOutputScript,
-        description: 'Hashed secret data slice'
-      }],
-      description: 'Secret data hashed'
-    }))
-    data[tx.txid] = slice
+    const sliceKey = crypto.randomUUID()
+    await set(sliceKey, slice)
+    sliceKeys.push(sliceKey)
   }
-  return data
+  return sliceKeys
 }
 
 // Verify the slices from each UTXO combine to equal the hashed data
-const isValidData = async ({
-  dataToValidate,
-  slices = []
-}) => {
-  const hashedData = crypto.createHash('sha256').update(dataToValidate).digest('base64')
+const validate = async (dataToValidate, sliceKeys = []) => {
+  // Get slices from slice keys
+  let slices = await Promise.all(sliceKeys.map(key => get(key)));
+  slices = slices.filter(slice => slice !== undefined);
+
+  // Make sure data was found
+  if (slices.length === 0) {
+    return false
+  }
+
+  const hashedData = bsv.crypto.Hash.sha256(Buffer.from(dataToValidate)).toString('base64')
   const combinedSecrets = secrets.hex2str(secrets.combine(slices))
 
   if (hashedData === combinedSecrets) {
@@ -49,4 +39,11 @@ const isValidData = async ({
   return false
 }
 
-module.exports = { createActions, isValidData }
+// Remove the slice keys from kvstore overlay
+const destroy = async (sliceKeys = []) => {
+  for (const key of sliceKeys) {
+    await remove(key)
+  }
+}
+
+module.exports = { create, validate, destroy }

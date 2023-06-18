@@ -11,6 +11,7 @@
   "dependencies": {
     "@babbage/sdk": "^0.4.25",
     "babbage-bsv": "^0.2.0",
+    "babbage-kvstore": "^1.1.10",
     "pushdrop": "^0.1.20"
   }
 }
