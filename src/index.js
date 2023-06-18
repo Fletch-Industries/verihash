@@ -3,10 +3,10 @@ const { get, set, remove } = require('babbage-kvstore')
 const bsv = require('babbage-bsv')
 
 // Create hashed data that is referenced securely on chain
-const create = async (secret = 'secret') => {
+const create = async (secret = 'secret', numberOfSlices = 2, threshold = 2) => {
   // Data to hash and store on chain
   const hashedData = bsv.crypto.Hash.sha256(Buffer.from(secret)).toString('base64')
-  const slicedData = secrets.share(secrets.str2hex(hashedData), 2, 2)
+  const slicedData = secrets.share(secrets.str2hex(hashedData), numberOfSlices, threshold)
 
   // Use the kvstore overlay to create a separate transaction for each slice
   // This also generates a separate protectedKey for the slice retrieval based on the randomUUID
