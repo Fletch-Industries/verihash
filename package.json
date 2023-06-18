@@ -1,5 +1,5 @@
 {
-  "name": "verihash",
+  "name": "fletch-verihash",
   "version": "0.1.0",
   "description": "Store record of your secrets securely on the blockchain.",
   "main": "./out/src/index.js",
