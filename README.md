@@ -76,6 +76,6 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 Makes use of [SecretCoin](https://github.com/mohrt/secretcoin)'s implementation of Shamir's Secret Sharing algorithm.
 
-## License
+## License & Confidentiality
 
-The license for the code in this repository is the Open BSV License
+This is proprietary software developed and owned by Fletch Industries, LLC. Except as provided for in your Fletch Partner Agreement with us, you may not use this software and must keep it confidential.
